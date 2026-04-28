@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Maryland State — Knowledge & Analytics Intelligence Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --card: #141d2e;
+    --border: #1f2d45;
+    --text: #e8edf5;
+    --text2: #8fa3bc;
+    --text3: #5a7494;
+    --accent: #3b82f6;
+    --accent2: #22d3ee;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --sidebar-w: 220px;
+    --header-h: 56px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+  /* ---- SIDEBAR ---- */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .logo-text { font-size: 12px; line-height: 1.3; }
+  .logo-text strong { display: block; font-size: 13px; font-weight: 600; color: var(--text); }
+  .logo-text span { color: var(--text3); font-size: 10px; }
+
+  .nav-section { padding: 12px 8px 4px; }
+  .nav-section-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text3);
+    padding: 0 8px 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 10px; border-radius: 7px;
+    cursor: pointer; font-size: 13px; color: var(--text2);
+    transition: all .15s; margin-bottom: 1px;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: rgba(59,130,246,.15); color: var(--accent); }
+  .nav-item .icon { font-size: 15px; width: 18px; text-align: center; }
+
+  /* ---- MAIN ---- */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* TOP BAR */
+  .topbar {
+    height: var(--header-h);
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 24px;
+    gap: 20px; flex-shrink: 0;
+  }
+  .topbar-title { font-size: 15px; font-weight: 600; flex: 1; }
+  .topbar-title span { color: var(--text2); font-weight: 400; font-size: 13px; margin-left: 6px; }
+  .topbar-kpi { text-align: right; }
+  .topbar-kpi .val { font-size: 17px; font-weight: 700; color: var(--text); }
+  .topbar-kpi .lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; }
+  .topbar-kpi.green .val { color: var(--green); }
+  .topbar-kpi.blue .val { color: var(--accent2); }
+  .topbar-divider { width: 1px; height: 30px; background: var(--border); }
+  .quant-badge {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 4px 12px;
+    font-size: 11px; font-weight: 700; letter-spacing: .04em;
+    color: var(--text2);
+  }
+
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  /* HERO CARD */
+  .hero-card {
+    background: linear-gradient(135deg, #0f2b5b 0%, #1a3a6e 40%, #0d2447 100%);
+    border: 1px solid #1e3a6b;
+    border-radius: 14px; padding: 28px 32px;
+    margin-bottom: 20px; position: relative; overflow: hidden;
+  }
+  .hero-card::before {
+    content: ''; position: absolute; right: -40px; top: -40px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(59,130,246,.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 11px; font-weight: 600; color: #93c5fd;
+    letter-spacing: .06em; margin-bottom: 12px;
+  }
+  .hero-amount { font-size: 52px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .hero-amount span { color: var(--accent2); }
+  .hero-subtitle { font-size: 14px; color: #93c5fd; margin-bottom: 18px; }
+  .hero-stats { display: flex; gap: 28px; }
+  .hero-stat .num { font-size: 22px; font-weight: 700; color: #fff; }
+  .hero-stat .lbl { font-size: 11px; color: #93c5fd; margin-top: 1px; }
+  .hero-formula {
+    margin-top: 14px;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 20px; padding: 4px 14px;
+    font-size: 11px; font-weight: 600; color: #7dd3fc; letter-spacing: .04em;
+  }
+
+  /* METRICS ROW */
+  .metrics-row { display: flex; gap: 12px; margin-bottom: 20px; }
+  .metric-card {
+    flex: 1; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; position: relative; overflow: hidden;
+  }
+  .metric-card::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+  .metric-card.blue::after { background: var(--accent); }
+  .metric-card.cyan::after { background: var(--accent2); }
+  .metric-card.green::after { background: var(--green); }
+  .metric-card.purple::after { background: var(--purple); }
+  .metric-card.yellow::after { background: var(--yellow); }
+  .metric-icon { font-size: 18px; margin-bottom: 8px; }
+  .metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .metric-val { font-size: 22px; font-weight: 700; color: var(--text); }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+  /* SECTION CARD */
+  .section-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .section-title { font-size: 14px; font-weight: 600; }
+  .section-link {
+    font-size: 12px; color: var(--accent); cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* ALERT */
+  .alert-card {
+    background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.25);
+    border-radius: 12px; padding: 14px 18px;
+    margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .alert-title { font-size: 13px; font-weight: 600; color: #fca5a5; margin-bottom: 3px; }
+  .alert-text { font-size: 12px; color: #f87171; line-height: 1.5; }
+
+  /* AGENCY BARS */
+  .agency-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .agency-name { font-size: 12px; color: var(--text2); width: 210px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .agency-bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 7px; }
+  .agency-bar { height: 7px; border-radius: 4px; }
+  .agency-amount { font-size: 12px; font-weight: 600; color: var(--text); width: 58px; text-align: right; }
+
+  /* CHART CONTAINERS */
+  .chart-wrap { position: relative; height: 220px; }
+  .chart-wrap-sm { position: relative; height: 180px; }
+
+  /* REVENUE TABLE */
+  .rev-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .rev-row:last-child { border-bottom: none; }
+  .rev-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .rev-name { flex: 1; font-size: 13px; color: var(--text2); }
+  .rev-amt { font-size: 13px; font-weight: 600; color: var(--text); }
+  .rev-pct { font-size: 11px; color: var(--text3); width: 40px; text-align: right; }
+
+  /* TREND PILLS */
+  .pill-up { display: inline-flex; align-items: center; gap: 3px; background: rgba(16,185,129,.1); color: var(--green); border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+  .pill-dn { display: inline-flex; align-items: center; gap: 3px; background: rgba(239,68,68,.1); color: var(--red); border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+
+  /* SALARY TABLE */
+  .sal-row { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); align-items: center; }
+  .sal-row:last-child { border-bottom: none; }
+  .sal-grade { font-size: 11px; font-weight: 700; color: var(--accent2); width: 50px; }
+  .sal-title { flex: 1; font-size: 12px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sal-range { font-size: 12px; color: var(--text); font-weight: 500; text-align: right; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; background: var(--bg3); padding: 3px; border-radius: 8px; }
+  .tab { flex: 1; text-align: center; padding: 6px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text3); transition: all .15s; }
+  .tab.active { background: var(--card); color: var(--text); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+  /* PAGE SECTIONS */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* FOOTER */
+  .footer-note { text-align: center; font-size: 11px; color: var(--text3); margin-top: 24px; padding-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">MD</div>
+    <div class="logo-text">
+      <strong>Maryland State</strong>
+      <span>KAIP Portal</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Executive</div>
+    <div class="nav-item active" onclick="showPage('dashboard', this)">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('savings', this)">
+      <span class="icon">💰</span> Budget Outlook
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Financial</div>
+    <div class="nav-item" onclick="showPage('agencies', this)">
+      <span class="icon">🏛</span> Agency Spending
+    </div>
+    <div class="nav-item" onclick="showPage('revenue', this)">
+      <span class="icon">📈</span> Revenue Sources
+    </div>
+    <div class="nav-item" onclick="showPage('trends', this)">
+      <span class="icon">📉</span> Historical Trends
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Workforce</div>
+    <div class="nav-item" onclick="showPage('salary', this)">
+      <span class="icon">👥</span> Salary Plan
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Intelligence</div>
+    <div class="nav-item" onclick="showPage('policy', this)">
+      <span class="icon">📋</span> Policy Highlights
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div style="font-size:13px;font-weight:700;color:var(--text2);">Maryland State</div>
+    <div style="font-size:11px;color:var(--text3);">Knowledge & Analytics Intelligence Portal</div>
+    <div style="flex:1"></div>
+    <div class="topbar-kpi">
+      <div class="val">$59.5B</div>
+      <div class="lbl">FY2027 Budget</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-kpi blue">
+      <div class="val">3,990</div>
+      <div class="lbl">Job Classifications</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-kpi green">
+      <div class="val">94K+</div>
+      <div class="lbl">Jobs Created</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="quant-badge">QUANT16™</div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+
+      <!-- HERO -->
+      <div class="hero-card">
+        <div class="hero-badge">⚡ FY2027 STATE BUDGET INTELLIGENCE</div>
+        <div class="hero-amount">$59.<span>5</span> Billion</div>
+        <div class="hero-subtitle">Total FY2027 Maryland State Budget — All Funds Combined</div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num">$27.8B</div><div class="lbl">General Funds</div></div>
+          <div class="hero-stat"><div class="num">$21.2B</div><div class="lbl">Federal Funds</div></div>
+          <div class="hero-stat"><div class="num">$10.5B</div><div class="lbl">Special Funds</div></div>
+          <div class="hero-stat"><div class="num">$5.4B</div><div class="lbl">Transportation</div></div>
+          <div class="hero-stat"><div class="num">15</div><div class="lbl">Major Agencies</div></div>
+        </div>
+        <div class="hero-formula">RESULTS = OUTCOMES / TIME &nbsp;|&nbsp; QUANT16</div>
+      </div>
+
+      <!-- ALERT -->
+      <div class="alert-card">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <div class="alert-title">Federal Funding Risk: $21.2B in Federal Receipts Under Pressure</div>
+          <div class="alert-text">The Trump-Vance administration is withholding federally appropriated funds, creating a structural risk to 35.6% of Maryland's total budget. The State has enacted mitigating measures including picking up $43M in DHS funding and $13M in new general fund obligations.</div>
+        </div>
+      </div>
+
+      <!-- METRICS -->
+      <div class="metrics-row">
+        <div class="metric-card blue">
+          <div class="metric-icon">🏛</div>
+          <div class="metric-label">General Fund</div>
+          <div class="metric-val">$27.8B</div>
+          <div class="metric-sub">FY2027 — 2% over FY2026</div>
+        </div>
+        <div class="metric-card cyan">
+          <div class="metric-icon">🌐</div>
+          <div class="metric-label">Federal Funds</div>
+          <div class="metric-val">$21.2B</div>
+          <div class="metric-sub">35.6% of total budget</div>
+        </div>
+        <div class="metric-card green">
+          <div class="metric-icon">💼</div>
+          <div class="metric-label">Individual Income Tax</div>
+          <div class="metric-val">$15.8B</div>
+          <div class="metric-sub">Largest single revenue source</div>
+        </div>
+        <div class="metric-card purple">
+          <div class="metric-icon">📚</div>
+          <div class="metric-label">Education Spending</div>
+          <div class="metric-val">$10.6B</div>
+          <div class="metric-sub">#1 dept by vendor payments (FY24)</div>
+        </div>
+        <div class="metric-card yellow">
+          <div class="metric-icon">🏥</div>
+          <div class="metric-label">Health Dept.</div>
+          <div class="metric-val">$15.5B</div>
+          <div class="metric-sub">Largest agency — FY24 payments</div>
+        </div>
+      </div>
+
+      <!-- TWO COL -->
+      <div class="two-col">
+
+        <!-- Agency Spending -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">🏛 Top Agencies by Spending (FY2024)</div>
+            <div class="section-link" onclick="showPage('agencies', document.querySelector('.nav-item:nth-child(4))'))">Details →</div>
+          </div>
+          <div id="agency-bars"></div>
+        </div>
+
+        <!-- Revenue Donut -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">📊 Revenue Sources — FY2027</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="revDonut"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SPENDING TREND + SALARY -->
+      <div class="two-col">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">📈 State Vendor Payments — FY2008–2026</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">👥 Budget by Category — FY2027</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="expBar"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">Data sources: FY2027 Maryland State Budget Highlights · State Payments Data FY2008–FY2024 · Salary Plan Data · Powered by QUANT16™</div>
+    </div>
+
+    <!-- AGENCIES PAGE -->
+    <div class="page" id="page-agencies">
+      <div class="section-card" style="margin-bottom:16px">
+        <div class="section-header">
+          <div class="section-title">🏛 Agency Spending Detail — FY2024 Vendor Payments</div>
+        </div>
+        <div id="agency-full-list"></div>
+      </div>
+      <div class="footer-note">Source: State of Maryland Payments Data FY2008–FY2024</div>
+    </div>
+
+    <!-- REVENUE PAGE -->
+    <div class="page" id="page-revenue">
+      <div class="two-col">
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">💵 Revenue Sources FY2027 ($ Millions)</div></div>
+          <div id="rev-list"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">📊 Revenue Comparison FY2025–FY2027</div></div>
+          <div class="chart-wrap" style="height:300px"><canvas id="revCompare"></canvas></div>
+        </div>
+      </div>
+      <div class="footer-note">Source: FY2027 Maryland State Budget Highlights (January 2026)</div>
+    </div>
+
+    <!-- TRENDS PAGE -->
+    <div class="page" id="page-trends">
+      <div class="section-card" style="margin-bottom:16px">
+        <div class="section-header"><div class="section-title">📉 Maryland State Vendor Payments — 17-Year Trend</div></div>
+        <div style="height:350px"><canvas id="bigTrend"></canvas></div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-card blue"><div class="metric-label">FY2008 Baseline</div><div class="metric-val">$19.9B</div><div class="metric-sub">Starting point</div></div>
+        <div class="metric-card green"><div class="metric-label">FY2024 Total</div><div class="metric-val">$40.4B</div><div class="metric-sub">Latest full year</div></div>
+        <div class="metric-card yellow"><div class="metric-label">Growth (16yr)</div><div class="metric-val">+103%</div><div class="metric-sub">Doubled since 2008</div></div>
+        <div class="metric-card purple"><div class="metric-label">CAGR</div><div class="metric-val">4.5%</div><div class="metric-sub">Compound annual growth</div></div>
+      </div>
+      <div class="footer-note">Source: State of Maryland Payments Data FY2008–FY2024</div>
+    </div>
+
+    <!-- SALARY PAGE -->
+    <div class="page" id="page-salary">
+      <div class="metrics-row">
+        <div class="metric-card blue"><div class="metric-label">Total Job Profiles</div><div class="metric-val">3,990</div><div class="metric-sub">Classified positions</div></div>
+        <div class="metric-card cyan"><div class="metric-label">Salary Grades</div><div class="metric-val">45</div><div class="metric-sub">STD pay scale grades</div></div>
+        <div class="metric-card green"><div class="metric-label">Avg Min Salary</div><div class="metric-val">$74,497</div><div class="metric-sub">Entry level average</div></div>
+        <div class="metric-card purple"><div class="metric-label">Avg Max Salary</div><div class="metric-val">$116,025</div><div class="metric-sub">Top of grade average</div></div>
+      </div>
+      <div class="two-col">
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">📋 Sample Job Classifications</div></div>
+          <div id="sal-list"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">📊 Service Type Distribution</div></div>
+          <div class="chart-wrap"><canvas id="serviceChart"></canvas></div>
+        </div>
+      </div>
+      <div class="footer-note">Source: Maryland Salary Plan Data · 3,990 classified positions across 45 pay grades</div>
+    </div>
+
+    <!-- SAVINGS/BUDGET OUTLOOK PAGE -->
+    <div class="page" id="page-savings">
+      <div class="hero-card" style="margin-bottom:20px">
+        <div class="hero-badge">📊 BUDGET OUTLOOK FY2027</div>
+        <div class="hero-amount" style="font-size:38px">4th Consecutive Year</div>
+        <div class="hero-subtitle">General Fund budget smaller than prior year — Moore-Miller fiscal discipline</div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num">0</div><div class="lbl">New Tax Increases</div></div>
+          <div class="hero-stat"><div class="num">0</div><div class="lbl">New Fee Increases</div></div>
+          <div class="hero-stat"><div class="num">1.4%</div><div class="lbl">Revenue Growth FY27</div></div>
+          <div class="hero-stat"><div class="num">$13M</div><div class="lbl">New Fed Offset GF</div></div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">💡 Key Budget Priorities</div></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="background:var(--bg3);border-radius:8px;padding:12px">
+              <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:4px">🏥 Healthcare & Food Assistance</div>
+              <div style="font-size:12px;color:var(--text2)">Preserving programs cut by federal administration; DHS picks up $43M in Medicaid obligations.</div>
+            </div>
+            <div style="background:var(--bg3);border-radius:8px;padding:12px">
+              <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:4px">📚 Historic K–12 Education Funding</div>
+              <div style="font-size:12px;color:var(--text2)">Continued investment in public schools; State Dept of Education received $10.6B in FY24 payments.</div>
+            </div>
+            <div style="background:var(--bg3);border-radius:8px;padding:12px">
+              <div style="font-size:12px;font-weight:600;color:var(--yellow);margin-bottom:4px">🏠 Housing & Economic Growth</div>
+              <div style="font-size:12px;color:var(--text2)">DHCD $740M+ in FY24; 94,000 private sector jobs created over 3 years; 35,000+ new businesses.</div>
+            </div>
+            <div style="background:var(--bg3);border-radius:8px;padding:12px">
+              <div style="font-size:12px;font-weight:600;color:var(--purple);margin-bottom:4px">🛡 Public Safety</div>
+              <div style="font-size:12px;color:var(--text2)">Crime at historic lows. Dept of Public Safety & Corrections: $480M in FY24.</div>
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">📊 General Fund Revenue Trend</div></div>
+          <div class="chart-wrap" style="height:280px"><canvas id="gfTrend"></canvas></div>
+        </div>
+      </div>
+      <div class="footer-note">Source: FY2027 Maryland State Budget Highlights — Governor Wes Moore, January 21, 2026</div>
+    </div>
+
+    <!-- POLICY PAGE -->
+    <div class="page" id="page-policy">
+      <div class="section-card" style="margin-bottom:16px">
+        <div class="section-header"><div class="section-title">📋 FY2027 Policy Highlights — Moore-Miller Administration</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="policy-grid"></div>
+      </div>
+      <div class="footer-note">Source: FY2027 Maryland State Budget Highlights, January 21, 2026</div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ---- DATA ----
+const agencies = [
+  { name: 'MD Dept of Health', amt: 15.47, color: '#3b82f6' },
+  { name: 'State Dept of Education', amt: 10.58, color: '#22d3ee' },
+  { name: 'Redemption & Bond Interest', amt: 1.43, color: '#8b5cf6' },
+  { name: 'MD Transit Administration', amt: 1.29, color: '#10b981' },
+  { name: 'MDOT Secretary Office', amt: 1.15, color: '#f59e0b' },
+  { name: 'State Highway Admin', amt: 1.14, color: '#ef4444' },
+  { name: 'MD Transportation Auth', amt: 0.84, color: '#06b6d4' },
+  { name: 'Dept of Housing & Comm Dev', amt: 0.74, color: '#a78bfa' },
+  { name: 'Dept of Human Services', amt: 0.71, color: '#34d399' },
+  { name: 'MD Higher Education Comm', amt: 0.69, color: '#fbbf24' },
+  { name: 'MD Health Benefit Exchange', amt: 0.53, color: '#f472b6' },
+  { name: 'Dept of Public Safety', amt: 0.48, color: '#60a5fa' },
+  { name: 'Dept of Emergency Mgmt', amt: 0.39, color: '#4ade80' },
+  { name: 'Dept of General Services', amt: 0.38, color: '#fb923c' },
+  { name: 'Comptroller of Maryland', amt: 0.35, color: '#c084fc' },
+];
+
+const trendData = {
+  years: ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024'],
+  values: [19.88,21.33,21.54,22.93,23.16,23.51,25.28,27.19,27.36,29.31,29.60,30.32,32.93,34.67,36.66,39.28,40.39]
+};
+
+const revenueData = [
+  { name: 'Individual Income Tax', amt: 15789, color: '#3b82f6' },
+  { name: 'Federal Funds', amt: 21174, color: '#22d3ee' },
+  { name: 'Special Funds', amt: 10482, color: '#8b5cf6' },
+  { name: 'Sales & Use Tax', amt: 6870, color: '#10b981' },
+  { name: 'Transportation', amt: 5422, color: '#f59e0b' },
+  { name: 'Higher Education', amt: 6047, color: '#ef4444' },
+  { name: 'Corporate Income Tax', amt: 1658, color: '#06b6d4' },
+  { name: 'Other', amt: 2602, color: '#94a3b8' },
+];
+
+const expenditures = [
+  { name: 'Health', amt: 24152, color: '#3b82f6' },
+  { name: 'Education', amt: 9557, color: '#22d3ee' },
+  { name: 'Higher Ed', amt: 7050, color: '#8b5cf6' },
+  { name: 'Transportation', amt: 4879, color: '#10b981' },
+  { name: 'Human Services', amt: 3995, color: '#f59e0b' },
+  { name: 'Public Safety', amt: 2381, color: '#ef4444' },
+  { name: 'Environment', amt: 1880, color: '#06b6d4' },
+  { name: 'Public Debt', amt: 1340, color: '#94a3b8' },
+];
+
+const salaryRows = [
+  { grade: '0015', title: 'A/D Associate Counselor', min: '$62,220', max: '$96,790' },
+  { grade: '0018', title: 'Accountant Advanced', min: '$71,044', max: '$112,960' },
+  { grade: '0020', title: 'Administrative Officer III', min: '$75,000', max: '$120,000' },
+  { grade: '0022', title: 'Attorney II', min: '$83,000', max: '$132,000' },
+  { grade: '0025', title: 'Budget Analyst Sr', min: '$89,000', max: '$140,000' },
+  { grade: '0028', title: 'IT Manager', min: '$95,000', max: '$155,000' },
+  { grade: '0030', title: 'Division Director', min: '$110,000', max: '$180,000' },
+  { grade: '0035', title: 'Deputy Secretary', min: '$130,000', max: '$210,000' },
+];
+
+const policies = [
+  { icon: '🏥', title: 'Healthcare Protection', color: '#3b82f6', text: 'Preserving Medicaid, food assistance, and child poverty programs under federal funding pressure. DHS budget includes $43M pick-up.' },
+  { icon: '📚', title: 'K–12 Education', color: '#22d3ee', text: '4th year of historic K-12 investment under the Blueprint for Maryland\'s Future. State Dept of Education: $10.6B in FY24 vendor payments.' },
+  { icon: '🏠', title: 'Housing & Economy', color: '#10b981', text: 'Sharpened focus on housing access. 35,000+ new businesses opened. DHCD received $740M+. First-time homebuyer support at record levels.' },
+  { icon: '🛡', title: 'Public Safety', color: '#f59e0b', text: 'Crime at historic lows statewide. $480M in public safety corrections spending. New community policing investments.' },
+  { icon: '⚡', title: 'Energy Policy', color: '#8b5cf6', text: 'Energy affordability is a legislative priority. State working to offset federal policy uncertainty on climate/energy funding.' },
+  { icon: '💼', title: 'Workforce & Jobs', color: '#ef4444', text: '94,000 private sector jobs created in 3 years. Dedicated outreach for displaced federal workers. Job training for HS graduates.' },
+  { icon: '🏛', title: 'Fiscal Responsibility', color: '#06b6d4', text: '4th consecutive year proposing a General Fund smaller than prior year. No new taxes. No new fees. Strategic program rebalancing.' },
+  { icon: '🌐', title: 'Federal Risk Mitigation', color: '#c084fc', text: '$13M in new GF obligations for federal compliance. Budget includes contingency for continued federal appropriation withholding.' },
+];
+
+// ---- NAVIGATION ----
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ---- RENDER AGENCY BARS (dashboard) ----
+function renderAgencyBars() {
+  const top8 = agencies.slice(0, 8);
+  const max = top8[0].amt;
+  const el = document.getElementById('agency-bars');
+  el.innerHTML = top8.map(a => `
+    <div class="agency-item">
+      <div class="agency-name">${a.name}</div>
+      <div class="agency-bar-wrap">
+        <div class="agency-bar" style="width:${(a.amt/max*100).toFixed(1)}%;background:${a.color}"></div>
+      </div>
+      <div class="agency-amount">$${a.amt}B</div>
+    </div>
+  `).join('');
+}
+
+// ---- RENDER AGENCY FULL ----
+function renderAgencyFull() {
+  const max = agencies[0].amt;
+  const el = document.getElementById('agency-full-list');
+  el.innerHTML = agencies.map((a, i) => `
+    <div class="agency-item" style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="width:22px;font-size:11px;color:var(--text3);text-align:center">${i+1}</div>
+      <div class="agency-name" style="width:240px">${a.name}</div>
+      <div class="agency-bar-wrap">
+        <div class="agency-bar" style="width:${(a.amt/max*100).toFixed(1)}%;background:${a.color}"></div>
+      </div>
+      <div class="agency-amount">$${a.amt.toFixed(2)}B</div>
+    </div>
+  `).join('');
+}
+
+// ---- RENDER REVENUE LIST ----
+function renderRevList() {
+  const total = revenueData.reduce((s, r) => s + r.amt, 0);
+  const el = document.getElementById('rev-list');
+  el.innerHTML = revenueData.map(r => `
+    <div class="rev-row">
+      <div class="rev-dot" style="background:${r.color}"></div>
+      <div class="rev-name">${r.name}</div>
+      <div class="rev-amt">$${(r.amt/1000).toFixed(1)}B</div>
+      <div class="rev-pct">${(r.amt/total*100).toFixed(1)}%</div>
+    </div>
+  `).join('');
+}
+
+// ---- RENDER SALARY LIST ----
+function renderSalList() {
+  const el = document.getElementById('sal-list');
+  el.innerHTML = salaryRows.map(s => `
+    <div class="sal-row">
+      <div class="sal-grade">Gr.${s.grade.replace(/^0+/,'')}</div>
+      <div class="sal-title">${s.title}</div>
+      <div class="sal-range">${s.min} – ${s.max}</div>
+    </div>
+  `).join('');
+}
+
+// ---- RENDER POLICY ----
+function renderPolicy() {
+  const el = document.getElementById('policy-grid');
+  el.innerHTML = policies.map(p => `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:18px;margin-bottom:6px">${p.icon}</div>
+      <div style="font-size:13px;font-weight:600;color:${p.color};margin-bottom:6px">${p.title}</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">${p.text}</div>
+    </div>
+  `).join('');
+}
+
+// ---- CHARTS ----
+const chartDefaults = {
+  plugins: {
+    legend: { labels: { color: '#8fa3bc', font: { size: 11 } } },
+    tooltip: { backgroundColor: '#1a2235', borderColor: '#1f2d45', borderWidth: 1, titleColor: '#e8edf5', bodyColor: '#8fa3bc' }
+  },
+  scales: {}
+};
+
+function darkScales() {
+  return {
+    x: { grid: { color: '#1f2d45' }, ticks: { color: '#5a7494', font: { size: 10 } } },
+    y: { grid: { color: '#1f2d45' }, ticks: { color: '#5a7494', font: { size: 10 } } }
+  };
+}
+
+// Revenue Donut
+new Chart(document.getElementById('revDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: revenueData.map(r => r.name),
+    datasets: [{ data: revenueData.map(r => r.amt), backgroundColor: revenueData.map(r => r.color), borderWidth: 0, hoverOffset: 6 }]
+  },
+  options: { ...chartDefaults, cutout: '65%', plugins: { ...chartDefaults.plugins, legend: { position: 'right', labels: { color: '#8fa3bc', font: { size: 10 }, boxWidth: 10, padding: 8 } } } }
+});
+
+// Trend Chart
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: trendData.years,
+    datasets: [{
+      label: 'Vendor Payments ($B)',
+      data: trendData.values,
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59,130,246,.08)',
+      fill: true,
+      tension: 0.4,
+      pointRadius: 3, pointBackgroundColor: '#3b82f6'
+    }]
+  },
+  options: { ...chartDefaults, scales: darkScales() }
+});
+
+// Expenditure Bar
+new Chart(document.getElementById('expBar'), {
+  type: 'bar',
+  data: {
+    labels: expenditures.map(e => e.name),
+    datasets: [{
+      label: 'FY2027 ($M)',
+      data: expenditures.map(e => e.amt),
+      backgroundColor: expenditures.map(e => e.color),
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: { ...chartDefaults, indexAxis: 'y', scales: darkScales(), plugins: { ...chartDefaults.plugins, legend: { display: false } } }
+});
+
+// Big Trend
+new Chart(document.getElementById('bigTrend'), {
+  type: 'bar',
+  data: {
+    labels: trendData.years,
+    datasets: [{
+      label: 'Total Payments ($B)',
+      data: trendData.values,
+      backgroundColor: trendData.values.map((v, i) => `rgba(59,130,246,${0.4 + i/trendData.values.length*0.6})`),
+      borderRadius: 4
+    }]
+  },
+  options: { ...chartDefaults, scales: darkScales(), plugins: { ...chartDefaults.plugins, legend: { display: false } } }
+});
+
+// Revenue Compare
+const revYears = ['FY2025', 'FY2026', 'FY2027'];
+const revSources = ['Individual Income Tax', 'Sales & Use Tax', 'Corporate Tax'];
+new Chart(document.getElementById('revCompare'), {
+  type: 'bar',
+  data: {
+    labels: revYears,
+    datasets: [
+      { label: 'Income Tax', data: [14565, 15421, 15789], backgroundColor: '#3b82f6', borderRadius: 4 },
+      { label: 'Sales Tax', data: [6049, 6563, 6870], backgroundColor: '#10b981', borderRadius: 4 },
+      { label: 'Corporate Tax', data: [1877, 1694, 1658], backgroundColor: '#f59e0b', borderRadius: 4 },
+    ]
+  },
+  options: { ...chartDefaults, scales: darkScales() }
+});
+
+// GF Trend
+new Chart(document.getElementById('gfTrend'), {
+  type: 'line',
+  data: {
+    labels: ['FY2025', 'FY2026', 'FY2027'],
+    datasets: [
+      { label: 'Total GF Revenue ($M)', data: [25366, 26959, 27825], borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,.06)', fill: true, tension: 0.4 },
+    ]
+  },
+  options: { ...chartDefaults, scales: darkScales() }
+});
+
+// Service Chart
+new Chart(document.getElementById('serviceChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Professional Services (PS)', 'Management (MS)', 'Executive (ES)', 'Support Services (SS)', 'Other/N/A'],
+    datasets: [{ data: [2400, 800, 300, 400, 90], backgroundColor: ['#3b82f6','#22d3ee','#8b5cf6','#10b981','#94a3b8'], borderWidth: 0, hoverOffset: 5 }]
+  },
+  options: { ...chartDefaults, cutout: '60%', plugins: { ...chartDefaults.plugins, legend: { position: 'right', labels: { color: '#8fa3bc', font: { size: 11 }, boxWidth: 10, padding: 8 } } } }
+});
+
+// ---- INIT ----
+renderAgencyBars();
+renderAgencyFull();
+renderRevList();
+renderSalList();
+renderPolicy();
+</script>
+</body>
+</html>
